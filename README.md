@@ -1,0 +1,2 @@
+# Esse sera o serviço principal do projeto, onde será feito o controle de acesso e a autenticação do usuário.
+- ## Here will be created the main service of the project, where the front-end will be made and the user authentication and access control will be done.

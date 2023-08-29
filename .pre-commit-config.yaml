@@ -12,13 +12,12 @@ repos:
     - id: flake8
       exclude: 'tests|env|docs'
       stages: [commit]
-  
 
 -   repo: local
     hooks:
       - id: requirements
         name: requirements
-        entry: bash -c 'poetry export -f requirements.txt --output requirements.txt; git add requirements.txt'
+        entry: bash -c 'poetry export --without-hashes --without-python-version --format=requirements.txt > requirements.txt; git add requirements.txt'
         language: system
         pass_filenames: false
         stages: [commit]

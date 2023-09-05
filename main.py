@@ -130,6 +130,151 @@ def get_article(query: ArticleSearchByIdSchema):
         return show_article(article), 200
 
 
+@app.delete(
+    "/articles/",
+    tags=[articles_tag],
+    description="Deletes a single article from the database",
+    responses={
+        "200": ArticleDeleteResponseSchema,
+        "404": ErrorSchema,
+    },
+)
+def delete_article(query: ArticleSearchByIdSchema):
+    """
+    Deletes a single article from the database
+    """
+    with DBConnectionHandler() as db_conn:
+        article = db_conn.session.query(Article).filter_by(id=query.id).first()
+        deleted_id = article.id
+        if not article:
+            return {"message": "Article not found"}, 404
+
+        db_conn.session.delete(article)
+        db_conn.session.commit()
+
+        return {"message": "Article Deleted Successfully", "id": deleted_id}, 200
+
+
+@app.get(
+    "/articles/search/nickname",
+    tags=[articles_tag],
+    description="Returns a list of articles from the database based on a search nickname",
+    responses={
+        "200": ArticleListSchema,
+        "404": ErrorSchema,
+    },
+)
+def search_articles_by_nickname(query: ArticleSearchByNicknameSchema):
+    """
+    Returns a list of articles from the database based on a search nickname
+    """
+    with DBConnectionHandler() as db_conn:
+        articles = (
+            db_conn.session.query(Article)
+            .filter(Article.nickname.like(f"%{query.nickname}%"))
+            .all()
+        )
+
+        if not articles:
+            return {"articles": [], "totalResults": 0}, 200
+
+        return show_articles(articles), 200
+
+
+@app.get(
+    "/articles/search/source",
+    tags=[articles_tag],
+    description="Returns a list of articles from the database based on a search source",
+    responses={
+        "200": ArticleListSchema,
+        "404": ErrorSchema,
+    },
+)
+def search_articles_by_source(query: ArticleSearchBySourceSchema):
+    """
+    Returns a list of articles from the database based on a search source
+    """
+    with DBConnectionHandler() as db_conn:
+        articles = (
+            db_conn.session.query(Article)
+            .filter(Article.source_name.like(f"%{query.source_name}%"))
+            .all()
+        )
+
+        if not articles:
+            return {"articles": [], "totalResults": 0}, 200
+
+        return show_articles(articles), 200
+
+
+def search_articles_by_title(query: ArticleSearchByTitleSchema):
+    """
+    Returns a list of articles from the database based on a search title
+    """
+    with DBConnectionHandler() as db_conn:
+        articles = (
+            db_conn.session.query(Article)
+            .filter(Article.title.like(f"%{query.title}%"))
+            .all()
+        )
+
+        if not articles:
+            return {"articles": [], "totalResults": 0}, 200
+
+        return show_articles(articles), 200
+
+
+@app.get(
+    "/articles/search/authors",
+    tags=[articles_tag],
+    description="Returns a list of articles from the database based on a search author",
+    responses={
+        "200": ArticleListSchema,
+        "404": ErrorSchema,
+    },
+)
+def search_articles_by_author(query: ArticleSearchByAuthorSchema):
+    """
+    Returns a list of articles from the database based on a search author
+    """
+    with DBConnectionHandler() as db_conn:
+        articles = (
+            db_conn.session.query(Article)
+            .filter(Article.author.like(f"%{query.author}%"))
+            .all()
+        )
+
+        if not articles:
+            return {"articles": [], "totalResults": 0}, 200
+
+        return show_articles(articles), 200
+
+
+@app.put(
+    "/articles/nickname",
+    tags=[articles_tag],
+    description="Updates the nickname of an article in the database",
+    responses={
+        "200": ArticleViewSchema,
+        "404": ErrorSchema,
+    },
+)
+def update_article_nickname(query: ArticleUpdateNicknameSchema):
+    """
+    Updates the nickname of an article in the database
+    """
+    with DBConnectionHandler() as db_conn:
+        article = db_conn.session.query(Article).filter_by(id=query.id).first()
+
+        if not article:
+            return {"message": "Article not found"}, 404
+
+        article.nickname = query.nickname
+        db_conn.session.commit()
+
+        return show_article(article), 200
+
+
 if __name__ == "__main__":
     with app.app_context():
         # Create database if it does not exist

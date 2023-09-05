@@ -8,6 +8,7 @@ class ArticleSchema(BaseModel):
     Defines the schema of an newly created Article
     """
 
+    id: Optional[int] = 1
     author: Optional[str] = "Unknown"
     nickname: Optional[str] = "Unknown"
     title: Optional[str] = "Article Title"
@@ -66,7 +67,7 @@ class ArticleSearchByIdSchema(BaseModel):
     Defines the schema of an Article to be searched by id
     """
 
-    id: int = "Unknown"
+    id: int = 1
 
 
 class ArticleSearchByNicknameSchema(BaseModel):
@@ -82,6 +83,9 @@ class ArticleUpdateNicknameSchema(BaseModel):
     Defines the schema of an Article to have its nickname updated
     """
 
+    id: int = 1
+    nickname: str = "Unknown Nickname"
+
 
 class ArticleDeleteResponseSchema(BaseModel):
     """
@@ -89,7 +93,7 @@ class ArticleDeleteResponseSchema(BaseModel):
     """
 
     message: str = "Article Deleted Successfully"
-    id: int = "Unknown"
+    id: int = 1
 
 
 class ArticleListSchema(BaseModel):
@@ -110,6 +114,7 @@ def show_articles(articles: List[ArticleSchema]):
     for article in articles:
         result.append(
             {
+                "id": article.id,
                 "author": article.author,
                 "title": article.title,
                 "description": article.description,
@@ -133,6 +138,7 @@ def show_article(article: ArticleSchema):
     Returns a single article
     """
     return {
+        "id": article.id,
         "author": article.author,
         "title": article.title,
         "description": article.description,

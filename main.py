@@ -1,5 +1,5 @@
 # flake8: noqa F405, F841
-from flask import redirect
+from flask import redirect, request
 from flask_cors import CORS
 from flask_openapi3 import Info, OpenAPI, Tag
 from sqlalchemy.exc import IntegrityError
@@ -20,6 +20,7 @@ app = OpenAPI(
     __name__,
     info=info,
 )
+
 
 # Setup CORS
 CORS(app)
@@ -48,31 +49,34 @@ def home():
         "400": ErrorSchema,
     },
 )
-def add_article(form: ArticleSchema):
+def add_article():
     """
     Adds an article to the database
     """
-    print(form)
-    article = Article(
-        nickname=form.nickname,
-        author=form.author,
-        title=form.title,
-        description=form.description,
-        url=form.url,
-        urlToImage=form.urlToImage,
-        publishedAt=form.publishedAt,
-        content=form.content,
-        source_id=form.source_id,
-        source_name=form.source_name,
+    form = request.get_json()
+    newArticle = Article(
+        nickname=form.get("nickname"),
+        author=form.get("author"),
+        title=form.get("title"),
+        url=form.get("url"),
+        urlToImage=form.get("urlToImage"),
+        publishedAt=form.get("publishedAt"),
+        source=form.get("source"),
     )
 
     try:
         with DBConnectionHandler() as db_conn:
-            db_conn.session.add(article)
-            db_conn.session.commit()
-            db_conn.session.refresh(article)
+            exists = (
+                db_conn.session.query(Article).filter_by(url=newArticle.url).first()
+            )
 
-            return show_article(article), 201
+            if exists:
+                return {"message": "Article already exists"}, 409
+            db_conn.session.add(newArticle)
+            db_conn.session.commit()
+            db_conn.session.refresh(newArticle)
+
+            return show_article(newArticle), 201
 
     except IntegrityError as e:
         db_conn.session.rollback()
@@ -139,12 +143,13 @@ def get_article(query: ArticleSearchByIdSchema):
         "404": ErrorSchema,
     },
 )
-def delete_article(query: ArticleSearchByIdSchema):
+def delete_article():
     """
     Deletes a single article from the database
     """
+    deleted_id = request.get_json().get("id")
     with DBConnectionHandler() as db_conn:
-        article = db_conn.session.query(Article).filter_by(id=query.id).first()
+        article = db_conn.session.query(Article).filter_by(id=deleted_id).first()
         deleted_id = article.id
         if not article:
             return {"message": "Article not found"}, 404
@@ -155,103 +160,8 @@ def delete_article(query: ArticleSearchByIdSchema):
         return {"message": "Article Deleted Successfully", "id": deleted_id}, 200
 
 
-@app.get(
-    "/articles/search/nickname",
-    tags=[articles_tag],
-    description="Returns a list of articles from the database based on a search nickname",
-    responses={
-        "200": ArticleListSchema,
-        "404": ErrorSchema,
-    },
-)
-def search_articles_by_nickname(query: ArticleSearchByNicknameSchema):
-    """
-    Returns a list of articles from the database based on a search nickname
-    """
-    with DBConnectionHandler() as db_conn:
-        articles = (
-            db_conn.session.query(Article)
-            .filter(Article.nickname.like(f"%{query.nickname}%"))
-            .all()
-        )
-
-        if not articles:
-            return {"articles": [], "totalResults": 0}, 200
-
-        return show_articles(articles), 200
-
-
-@app.get(
-    "/articles/search/source",
-    tags=[articles_tag],
-    description="Returns a list of articles from the database based on a search source",
-    responses={
-        "200": ArticleListSchema,
-        "404": ErrorSchema,
-    },
-)
-def search_articles_by_source(query: ArticleSearchBySourceSchema):
-    """
-    Returns a list of articles from the database based on a search source
-    """
-    with DBConnectionHandler() as db_conn:
-        articles = (
-            db_conn.session.query(Article)
-            .filter(Article.source_name.like(f"%{query.source_name}%"))
-            .all()
-        )
-
-        if not articles:
-            return {"articles": [], "totalResults": 0}, 200
-
-        return show_articles(articles), 200
-
-
-def search_articles_by_title(query: ArticleSearchByTitleSchema):
-    """
-    Returns a list of articles from the database based on a search title
-    """
-    with DBConnectionHandler() as db_conn:
-        articles = (
-            db_conn.session.query(Article)
-            .filter(Article.title.like(f"%{query.title}%"))
-            .all()
-        )
-
-        if not articles:
-            return {"articles": [], "totalResults": 0}, 200
-
-        return show_articles(articles), 200
-
-
-@app.get(
-    "/articles/search/authors",
-    tags=[articles_tag],
-    description="Returns a list of articles from the database based on a search author",
-    responses={
-        "200": ArticleListSchema,
-        "404": ErrorSchema,
-    },
-)
-def search_articles_by_author(query: ArticleSearchByAuthorSchema):
-    """
-    Returns a list of articles from the database based on a search author
-    """
-    with DBConnectionHandler() as db_conn:
-        articles = (
-            db_conn.session.query(Article)
-            .filter(Article.author.like(f"%{query.author}%"))
-            .all()
-        )
-
-        if not articles:
-            return {"articles": [], "totalResults": 0}, 200
-
-        return show_articles(articles), 200
-
-
 @app.put(
-    "/articles/nickname",
+    "/articles/",
     tags=[articles_tag],
     description="Updates the nickname of an article in the database",
     responses={
@@ -259,18 +169,22 @@ def search_articles_by_author(query: ArticleSearchByAuthorSchema):
         "404": ErrorSchema,
     },
 )
-def update_article_nickname(query: ArticleUpdateNicknameSchema):
+def update_article_nickname():
     """
     Updates the nickname of an article in the database
     """
+    form = request.get_json()
+    article_id = form.get("id")
+    nickname = form.get("nickname")
     with DBConnectionHandler() as db_conn:
-        article = db_conn.session.query(Article).filter_by(id=query.id).first()
+        article = db_conn.session.query(Article).filter_by(id=article_id).first()
 
         if not article:
             return {"message": "Article not found"}, 404
 
-        article.nickname = query.nickname
+        article.nickname = nickname
         db_conn.session.commit()
+        db_conn.session.refresh(article)
 
         return show_article(article), 200
 

@@ -12,13 +12,10 @@ class ArticleSchema(BaseModel):
     author: Optional[str] = "Unknown"
     nickname: Optional[str] = "Unknown"
     title: Optional[str] = "Article Title"
-    description: Optional[str] = "Article Description"
     url: Optional[str] = "Article URL"
     urlToImage: Optional[str] = "Article URL to Image"
     publishedAt: Optional[str] = "Article Published At"
-    content: Optional[str] = "Article Content"
-    source_id: Optional[str] = "Article Source ID"
-    source_name: Optional[str] = "Article Source Name"
+    source: Optional[str] = "Article Source Name"
 
 
 class ArticleViewSchema(BaseModel):
@@ -29,13 +26,10 @@ class ArticleViewSchema(BaseModel):
     author: Optional[str] = "Unknown"
     nickname: Optional[str] = "Unknown"
     title: Optional[str] = "Article Title"
-    description: Optional[str] = "Article Description"
     url: Optional[str] = "Article URL"
     urlToImage: Optional[str] = "Article URL to Image"
     publishedAt: Optional[str] = "Article Published At"
-    content: Optional[str] = "Article Content"
-    source_id: Optional[str] = "Article Source ID"
-    source_name: Optional[str] = "Article Source Name"
+    source: Optional[str] = "Article Source Name"
 
 
 class ArticleSearchByAuthorSchema(BaseModel):
@@ -59,7 +53,7 @@ class ArticleSearchBySourceSchema(BaseModel):
     Defines the schema of an Article to be searched by source
     """
 
-    source_name: str = "Unknown"
+    source: str = "Unknown"
 
 
 class ArticleSearchByIdSchema(BaseModel):
@@ -105,6 +99,14 @@ class ArticleListSchema(BaseModel):
     totalResults: int
 
 
+class ArticleCheckExistsSchema(BaseModel):
+    """
+    Defines the schema of an existence of articles
+    """
+
+    url: str = "Article URL"
+
+
 def show_articles(articles: List[ArticleSchema]):
     """
     Returns a list of articles
@@ -117,13 +119,11 @@ def show_articles(articles: List[ArticleSchema]):
                 "id": article.id,
                 "author": article.author,
                 "title": article.title,
-                "description": article.description,
                 "url": article.url,
                 "urlToImage": article.urlToImage,
                 "publishedAt": article.publishedAt,
-                "content": article.content,
-                "source_id": article.source_id,
-                "source_name": article.source_name,
+                "source": article.source,
+                "nickname": article.nickname,
             }
         )
 
@@ -141,11 +141,9 @@ def show_article(article: ArticleSchema):
         "id": article.id,
         "author": article.author,
         "title": article.title,
-        "description": article.description,
         "url": article.url,
         "urlToImage": article.urlToImage,
         "publishedAt": article.publishedAt,
-        "content": article.content,
-        "source_id": article.source_id,
-        "source_name": article.source_name,
+        "source": article.source,
+        "nickname": article.nickname,
     }

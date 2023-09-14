@@ -5,17 +5,14 @@ from src.config.database import Base
 
 class Article(Base):
     __tablename__ = "articles"
-    id = Column(Integer, primary_key=True)
-    nickname = Column(String(50), nullable=True)
+    id = Column(Integer, primary_key=True, index=True)
+    nickname = Column(String(500), nullable=True)
     author = Column(String(50), nullable=True)
-    title = Column(String(50), nullable=True)
-    description = Column(String(50), nullable=True)
+    title = Column(String(500), nullable=True)
     url = Column(String(50), nullable=True)
     urlToImage = Column(String(50), nullable=True)
     publishedAt = Column(String(50), nullable=True)
-    content = Column(String(50), nullable=True)
-    source_id = Column(String(50), nullable=True)
-    source_name = Column(String(50), nullable=True)
+    source = Column(String(50), nullable=True)
 
     __table_args__ = (UniqueConstraint("title", "author", name="_title_author_uc"),)
 
@@ -24,27 +21,32 @@ class Article(Base):
         nickname: str,
         author: str,
         title: str,
-        description: str,
         url: str,
         urlToImage: str,
         publishedAt: str,
-        content: str,
-        source_id: str,
-        source_name: str,
+        source: str,
     ):
         self.nickname = nickname
         self.author = author
         self.title = title
-        self.description = description
         self.url = url
         self.urlToImage = urlToImage
         self.publishedAt = publishedAt
-        self.content = content
-        self.source_id = source_id
-        self.source_name = source_name
+        self.source = source
 
     def __repr__(self):
         """
         Returns string representation of Article object
         """
-        return f"(Article {self.title} by {self.author})"
+        return f"""
+        Article(
+            id={self.id},
+            nickname={self.nickname},
+            author={self.author},
+            title={self.title},
+            url={self.url},
+            urlToImage={self.urlToImage},
+            publishedAt={self.publishedAt},
+            source={self.source},
+        )
+        """

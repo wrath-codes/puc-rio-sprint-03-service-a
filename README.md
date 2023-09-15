@@ -6,6 +6,7 @@ Este projeto é um Backend para Sprint 03, faz parte do ultimo sprint da Pós Gr
 ## Pré-requisitos
 - [Python](https://www.python.org/downloads/)
 - [Poetry](https://python-poetry.org/docs/#installation)
+- [Docker](https://www.docker.com/)
 
 
 

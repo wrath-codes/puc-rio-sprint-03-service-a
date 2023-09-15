@@ -30,7 +30,7 @@ npm run dev
 5. Comandos uteis:
    - Para rodar o container:
       ```bash
-      docker run -it -p 5173:5173 sprint-3-frontend
+      docker run -it -p 4200:4200 sprint-3-backend
       ```
    - Para parar o container:
       ```bash

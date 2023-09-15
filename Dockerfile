@@ -23,6 +23,8 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY . /app
 
+EXPOSE 4200:4200
+
 CMD ["python", "./app/main.py"]
 
 

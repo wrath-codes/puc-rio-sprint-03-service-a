@@ -196,4 +196,4 @@ if __name__ == "__main__":
         create_db()
         print("Database setup completed...")
         print("Starting API server...")
-        app.run(debug=True, host="localhost", port=4200, use_reloader=True)
+        app.run(debug=True, host="0.0.0.0", port=4200, use_reloader=True)
